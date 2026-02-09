@@ -1,0 +1,677 @@
+{
+  "name": "Laurent Dealflow Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "64d1747b-7649-4bad-b93a-48962332ef08",
+      "name": "Telegram Trigger",
+      "webhookId": "59ac9d36-baf4-4cc9-ab03-278cd350e04b",
+      "credentials": {
+        "telegramApi": {
+          "id": "0Amd5H2QrxeC7cPe",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are my personal dealflow assistant. I meet startups and investors, and you help me track them and make connections.\n\nIMPORTANT: You are communicating with me via Telegram. You MUST use the Telegram tool to send any response, question, or confirmation back to me. I cannot see your thoughts—only messages sent via the Telegram tool.\n\nYou have access to a Google Sheet with two tabs:\n- \"Startups\": columns are name, sector, stage, description, contact, notes, date_added\n- \"Investors\": columns are name, firm, sectors, stages, what_excites_them, notes, date_added\n\nYour capabilities:\n- Add new startups or investors when I tell you about them\n- Look up startups or investors I've previously added\n- Delete startups or investors I've previously added\n- Find investor matches for a startup based on sector/stage fit and what excites the investor\n- Draft intro messages between a startup and investor\n- Update existing records\n- Answer questions about my dealflow\n\nWhen adding records:\n- Use the following date for date_added: {{ $now.format('yyyy-MM-dd') }}\n- If critical info is missing, use the Telegram tool to ask me, then wait for my response\n- If you have enough info to create a useful record, go ahead and save it—don't ask for optional details\n- Treat each new startup or investor mention as a fresh record. Don't mix details from previous conversations. If you're unsure whether a message relates to a previous request or is something new, ask me to clarify.\n\nWhen matching, explain your reasoning briefly.\nAlways respond via the Telegram tool.\n\nWhen sending messages via Telegram, use plain text only. No HTML tags, no Markdown. Use simple dashes (-) for lists and line breaks for structure. Keep formatting minimal.\n\nWhen deleting records:\n- Remember that row 1 contains headers, so data starts at row 2\n- Always verify the row number before deleting\n- Tell me which row number you're about to delete so I can verify\n\nWhen adding a NEW startup (not updating):\n- After saving to the CRM, automatically check your investor list for potential matches\n- Report back: \"Potential matches: [list].\"\n\nWhen adding a NEW investor (not updating):\n- After saving to the CRM, automatically check your startup list for potential matches\n- Report back: \"Potential matches: [list].\"\n\nFor updates to existing records, skip the matching step.\n\nREMINDER: You MUST use the Telegram tool to send your final response. Never end without sending a message via Telegram. If you complete any task (adding records, searching, matching), always finish by sending results to me via Telegram.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1ec5cc94-1c62-483d-9b04-6ae75e3715db",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-opus-4-5-20251101",
+          "mode": "list",
+          "cachedResultName": "Claude Opus 4.5"
+        },
+        "options": {
+          "thinking": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        240
+      ],
+      "id": "c5719334-333b-4e2f-b6d0-4461ffbd8693",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "b5YjFiNxKDFga2D7",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Read/search startups",
+        "documentId": {
+          "__rl": true,
+          "value": "1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI",
+          "mode": "list",
+          "cachedResultName": "Dealflow and investor CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Startups",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        368
+      ],
+      "id": "5aad3fb7-b6e1-42b7-9663-894fb2057c52",
+      "name": "Read/search startups",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yM2TxHlaqQssFOXr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Read/search investors",
+        "documentId": {
+          "__rl": true,
+          "value": "1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI",
+          "mode": "list",
+          "cachedResultName": "Dealflow and investor CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Investors",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        352
+      ],
+      "id": "049c90d3-b726-49c5-910f-262a881932e4",
+      "name": "Read/search investors",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yM2TxHlaqQssFOXr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Add or update a startup in the database. Provide values for these exact columns: name, sector, stage, description, contact, notes, date_added. The \"name\" column is used to match existing records.",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI",
+          "mode": "list",
+          "cachedResultName": "Dealflow and investor CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Startups",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('name__using_to_match_', ``, 'string') }}",
+            "sector": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sector', ``, 'string') }}",
+            "stage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('stage', ``, 'string') }}",
+            "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('description', ``, 'string') }}",
+            "contact": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('contact', ``, 'string') }}",
+            "notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('notes', ``, 'string') }}",
+            "date_added": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('date_added', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "name"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sector",
+              "displayName": "sector",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stage",
+              "displayName": "stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "contact",
+              "displayName": "contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_added",
+              "displayName": "date_added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        208
+      ],
+      "id": "cbab3b30-0f99-4ded-9d16-a5c94ad48187",
+      "name": "Add or edit startup",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yM2TxHlaqQssFOXr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Add or update an investor in the database. Columns: name, firm, sectors, stages, what_excites_them, notes, date_added. Matches on \"name\".\n",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI",
+          "mode": "list",
+          "cachedResultName": "Dealflow and investor CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Investors",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('name__using_to_match_', ``, 'string') }}",
+            "firm": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('firm', ``, 'string') }}",
+            "sectors": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sectors', ``, 'string') }}",
+            "stages": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('stages', ``, 'string') }}",
+            "what_excites_them": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('what_excites_them', ``, 'string') }}",
+            "notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('notes', ``, 'string') }}",
+            "date_added": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('date_added', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "name"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "firm",
+              "displayName": "firm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sectors",
+              "displayName": "sectors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stages",
+              "displayName": "stages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "what_excites_them",
+              "displayName": "what_excites_them",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_added",
+              "displayName": "date_added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        192
+      ],
+      "id": "79ac9fa2-d296-4483-897e-eaaca02b4f7a",
+      "name": "Add or edit investor",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yM2TxHlaqQssFOXr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Send a message back to the user on Telegram. Use this to respond to queries, confirm actions, ask clarifying questions, or share results.",
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        512
+      ],
+      "id": "7c0aa66c-28fc-4e58-8c42-85afb221675b",
+      "name": "Send a text message in Telegram",
+      "webhookId": "2e345653-2087-432b-844f-2bb89a2a1f3a",
+      "credentials": {
+        "telegramApi": {
+          "id": "0Amd5H2QrxeC7cPe",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        240
+      ],
+      "id": "5ab8d91b-0929-444c-96bc-2a7f4fe14826",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Delete a startup from the database by row number. First search to find the startup and confirm with the user before deleting.",
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI",
+          "mode": "list",
+          "cachedResultName": "Dealflow and investor CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Startups",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit#gid=0"
+        },
+        "startIndex": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Row_Number', ``, 'number') }}"
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        544
+      ],
+      "id": "bda57a28-682a-4cfb-b909-c7ed46840e1f",
+      "name": "Delete startup",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yM2TxHlaqQssFOXr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Delete an investor from the database by row number. First search to find the investor and confirm with the user before deleting.",
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI",
+          "mode": "list",
+          "cachedResultName": "Dealflow and investor CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1534263573,
+          "mode": "list",
+          "cachedResultName": "Investors",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1n_NkAYp3bEHTrFvDHVOXqdrm9kai1hhLRSw4YW3pwSI/edit#gid=1534263573"
+        },
+        "startIndex": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Row_Number', ``, 'number') }}"
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        528
+      ],
+      "id": "d59bb240-5562-420f-95b1-dcacb0a30a94",
+      "name": "Delete investor",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yM2TxHlaqQssFOXr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Investor tools",
+        "height": 80,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        96
+      ],
+      "id": "9fbd17d5-cf3a-4c89-aa3a-dbc02f9fa5b5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Startup tools",
+        "height": 80,
+        "width": 192,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        96
+      ],
+      "id": "e8e45eb6-0e9c-48e4-9698-292cec4948d2",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 627538204,
+          "message": {
+            "message_id": 70,
+            "from": {
+              "id": 7078834071,
+              "is_bot": false,
+              "first_name": "Laurent",
+              "last_name": "Oberholzer",
+              "username": "l0dhb",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 7078834071,
+              "first_name": "Laurent",
+              "last_name": "Oberholzer",
+              "username": "l0dhb",
+              "type": "private"
+            },
+            "date": 1769748044,
+            "text": "Series C, no contact"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/search startups": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/search investors": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add or edit startup": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add or edit investor": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Send a text message in Telegram": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete startup": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete investor": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "8c6dbfa9-4a60-4085-b716-172fa23bf63e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6227abb0b5a3ea8ebb369660a4611deb6a328b9ee399c3bce1da0aa2e625c029"
+  },
+  "id": "zJTZ_nB4Z0mutSP9VZ9zo",
+  "tags": []
+}
