@@ -4,6 +4,9 @@ An AI-powered dealflow management system that runs on Telegram. Track startups a
 
 Built with n8n, Claude, and Google Sheets.
 
+![Workflow Screenshot](workflow-screenshot.png)
+*The n8n workflow powering the Dealflow CRM bot*
+
 ## Features
 
 - **Add startups and investors** via natural language ("New startup: Acme, fintech, seed stage, building invoicing tools")
