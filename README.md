@@ -96,10 +96,6 @@ You'll need to set up four credentials:
 - Credential type: Anthropic
 - API Key: [your Anthropic API key]
 
-**SerpAPI:**
-- Credential type: SerpAPI
-- API Key: [your SerpAPI key]
-
 #### Update Node References
 
 After importing, you'll need to update:
